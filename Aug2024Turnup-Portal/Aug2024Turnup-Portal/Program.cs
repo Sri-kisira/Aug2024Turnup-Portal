@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.Extensions;
 using System.Net;
 using System.Xml.Serialization;
 
@@ -53,18 +54,20 @@ public class Program
         // Click on create New Button
         IWebElement CreateNewButton = driver.FindElement(By.XPath("//*[@id=\"container\"]/p/a"));
         CreateNewButton.Click();
-
+        Thread.Sleep(1000);
         // Select Time from Dropdown
         IWebElement typeCodeDropdown = driver.FindElement(By.XPath("//*[@id=\"TimeMaterialEditForm\"]/div/div[1]/div/span[1]/span/span[1]"));
         typeCodeDropdown.Click();
-
-        IWebElement timeOptions = driver.FindElement(By.XPath("//*[@id=\"TimeMaterialEditForm\"]/div/div[1]/div/span[1]/span/span[1]"));
+        Thread.Sleep(1000);
+        IWebElement timeOptions = driver.FindElement(By.XPath("//*[@id=\"TypeCode_listbox\"]/li[2]"));
         timeOptions.Click();
         Thread.Sleep(1000);
 
+        String codeValue = randomCode();
+
         // Type code into code textbox
         IWebElement CodeTextbox = driver.FindElement(By.Id("Code"));
-        CodeTextbox.SendKeys("TA Programme");
+        CodeTextbox.SendKeys(codeValue);
 
         // Type description into Description testbox
         IWebElement descriptionTextbox = driver.FindElement(By.Id("Description"));
@@ -89,7 +92,7 @@ public class Program
 
         IWebElement newCode = driver.FindElement(By.XPath("//*[@id=\"tmsGrid\"]/div[3]/table/tbody/tr[last()]/td[1]"));
 
-        if (newCode.Text == "TA Programme")
+        if (newCode.Text == codeValue)
         {
             Console.WriteLine("time record created successfully");
         }
@@ -97,13 +100,75 @@ public class Program
         {
             Console.WriteLine("new time record has not been created!");
         }
+    
+
+        //Edit time record
+        IWebElement editButton = driver.FindElement(By.XPath("//td[contains(text(),'" + codeValue + "')]/following-sibling::td[4]/a[contains(text(), 'Edit')]"));
+
+
+        Thread.Sleep(2000);
+        editButton.Click();
+        Thread.Sleep(3000);
+        IWebElement CodeTextboxEdit = driver.FindElement(By.Id("Code"));
+        IWebElement descriptionTextboxEdit = driver.FindElement(By.Id("Description"));
+        IWebElement PriceTextboxEdit = driver.FindElement(By.XPath("//input[@id='Price']/preceding-sibling::input"));
+        IWebElement EditSaveButton = driver.FindElement(By.Id("SaveButton"));
+        CodeTextboxEdit.Clear();
+        CodeTextboxEdit.SendKeys(codeValue + " Edited");
+        descriptionTextboxEdit.Clear() ;
+        descriptionTextboxEdit.SendKeys("editing description");
+        Thread.Sleep(3000);
+        IJavaScriptExecutor jse = (IJavaScriptExecutor)driver;
+        jse.ExecuteScript("arguments[0].value='55';", PriceTextboxEdit);
+        EditSaveButton.Click();
+        Thread.Sleep(2000);
+      
+
+        //DeleteTimeRecord
+        IWebElement goToLastPageButtonAfterEdit = driver.FindElement(By.XPath("//*[@id=\"tmsGrid\"]/div[4]/a[4]/span"));
+        goToLastPageButtonAfterEdit.Click();
+        Thread.Sleep(3000);
+        IWebElement deleteButton = driver.FindElement(By.XPath("//td[contains(text(),'"+ codeValue+" Edited')]/following-sibling::td[4]/a[contains(text(), 'Delete')]"));
+        deleteButton.Click();
+        Thread.Sleep(1000);
+        driver.SwitchTo().Alert().Accept();
+        driver.Close();
+    }   
+
+    public static String randomCode()
+    {
+        Random rand = new Random();
+
+        // Choosing the size of string 
+        // Using Next() string 
+        int stringlen = rand.Next(4, 10);
+        int randValue;
+        string str = "";
+        char letter;
+        for (int i = 0; i < stringlen; i++)
+        {
+
+            // Generating a random number. 
+            randValue = rand.Next(0, 26);
+
+            // Generating random character by converting 
+            // the random number into character. 
+            letter = Convert.ToChar(randValue + 65);
+
+            // Appending the letter to string. 
+            str = str + letter;
+        }
+        Console.Write("Random String:" + str);
+        return str;
     }
-  }
+}
+  
         
 
            
                 
         
+
 
 
 
